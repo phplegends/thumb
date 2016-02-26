@@ -108,12 +108,12 @@ class Thumb
     * Generate a filename
     * @return string
     */
-    protected function generateFilename()
+    public function generateFilename()
     {
         return $this->getOriginDirectory() . '/' . $this->generateBasename();
     }
 
-    protected function generateBasename()
+    public function generateBasename()
     {
         $filename = md5($this->image . $this->height . $this->width);
 
@@ -177,14 +177,5 @@ class Thumb
     {
         return new self($file, $width, $height);
     }
-
-    public function urlizle($relative, $base = null)
-    {
-
-        $filename = $this->getOriginDirectory() . '/' . $relative;
-
-        $this->save($filename);
-
-        return rtrim($base, '/') . '/' . $relative;
-    }   
+   
 }
