@@ -1,0 +1,23 @@
+{
+	"name" : "phplegends/thumb",
+	"description" : "A PHP package to make thumbs for image",
+	"license" : "MIT",
+	"authors" : [
+		{
+			"name" : "Wallace de souza",
+			"email" : "wallacemaxters@gmail.com",
+			"role"  : "Developer"
+		}
+	],
+
+	"autoload" : {
+		"psr-4" : {
+			"PHPLegends\\Thumb\\" : "src/Thumb"
+		}
+	},
+
+	"require" : {
+		"php"   : ">=5.4",
+		"gregwar/image" : "2.*"
+	}
+}
