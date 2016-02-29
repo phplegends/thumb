@@ -9,6 +9,13 @@ use Gregwar\Image\Image as GregwarImage;
 */
 class Thumb
 {
+
+    protected static $config = [
+        'base_uri'     => null,
+        'public_path'  => null,
+        'thumb_folder' => '_thumbs',
+    ];
+
     /**
     * Image to resize
     * @var string
@@ -90,6 +97,11 @@ class Thumb
         return new \SplFileObject($destiny, 'r');
     }
 
+    /**
+    * Set cache expiration in seconds
+    * @param string $seconds
+    * @return \PHPLegends\Thumb\Thumb
+    */
     public function setCacheExpiration($seconds)
     {
         $this->expiration = strtotime(sprintf('- %d seconds', $seconds));
@@ -179,14 +191,75 @@ class Thumb
         return new self($file, $width, $height);
     }
 
-    public function urlize($relative, $base = null)
+    /**
+    * 
+    * @param string $relative
+    * @param float $width
+    * @param float $height
+    * @return string
+    */
+    public static function url($relative, $width, $height = 0)
     {
+       
+        $urlizer = new Urlizer($relative);
 
-        $filename = $this->getOriginDirectory() . '/' . $relative;
+        if (isset(static::$config['public_path'])) {
+            $urlizer->setPublicPath(static::$config['public_path']);
+        }
 
-        $this->save($filename);
+        if (isset(static::$config['base_uri'])) {
+            $urlizer->setBaseUrl(static::$config['base_uri']);
+        }
 
-        return rtrim($base, '/') . '/' . $relative;
+        $urlizer->setThumbFolder(static::$config['thumb_folder']);
+
+        $thumb = new static($urlizer->getPublicFilename(), $width, $height);
+
+        $basename = $thumb->generateBasename();
+
+        $filename = $urlizer->buildThumbFilename($basename);
+
+        $thumb->save($filename);
+
+        return $urlizer->buildThumbUrl($basename);
+    }
+
+    /**
+    * @param string $relative
+    * @param array $attributes
+    * @return string
+    */
+    public static function image($relative, array $attributes = [])
+    {
+        $attributes += ['alt' => null, 'height' => 0, 'width' => 0];
+
+        $height = $attributes['height'];
+
+        $width = $attributes['width'];
+
+        $attributes['src'] = static::url($relative, $width, $height);
+
+        $attrs = [];
+
+        foreach ($attributes as $name => $attr) {
+
+            $attrs[] = "$name=\"{$attr}\"";
+        }
+
+        $attrs = implode(' ', $attrs);
+
+        return "<img {$attrs} />";
+
+    }
+
+    /**
+    * @static
+    * @param array $config
+    * @return void
+    */
+    public static function config(array $config)
+    {
+        static::$config = array_merge(static::$config, $config);
     }
 
 }
