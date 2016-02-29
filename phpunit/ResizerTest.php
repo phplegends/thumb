@@ -20,7 +20,7 @@ class ResizerTest extends PHPUnit_Framework_TestCase
 		$this->assertTrue(file_exists($destiny), 'File doesnt exists');
 	}
 
-	public function testCacheExpiration()
+	public function _testCacheExpiration()
 	{
 		$resizer = new Thumb(__DIR__ . '/../test/test.png', 50);
 
@@ -41,9 +41,15 @@ class ResizerTest extends PHPUnit_Framework_TestCase
 	public function testUrl()
 	{
 
-		$resizer = new Thumb(__DIR__ . '/../test/test.png', 50);
 
-		$resizer->urlizle('img/test-60.png', 'http://localhost:8000/test');
+		$url = Thumb::create(__DIR__ . '/../test/test.png', 50)
+					->urlize('img/test-60.png', 'http://localhost:8000/test');
+
+
+		$this->assertEquals(
+			'http://localhost:8000/test/img/test-60.png',
+			$url
+		);
 
 	}
 }

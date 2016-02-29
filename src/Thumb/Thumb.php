@@ -30,6 +30,7 @@ class Thumb
     */
     protected $expiration = null;
 
+
     /**
     * @param string $image
     * @param float $width
@@ -178,7 +179,7 @@ class Thumb
         return new self($file, $width, $height);
     }
 
-    public function urlizle($relative, $base = null)
+    public function urlize($relative, $base = null)
     {
 
         $filename = $this->getOriginDirectory() . '/' . $relative;
@@ -186,5 +187,5 @@ class Thumb
         $this->save($filename);
 
         return rtrim($base, '/') . '/' . $relative;
-    }   
+    }
 }
