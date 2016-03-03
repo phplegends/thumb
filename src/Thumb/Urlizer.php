@@ -35,7 +35,7 @@ class Urlizer
 	* 
 	* @param string $relative
 	*/
-	public function __construct($relative)
+	public function __construct($relative = null)
 	{
 		$this->relative = $relative;
 	}

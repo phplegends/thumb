@@ -198,22 +198,28 @@ class Thumb
     * @param float $height
     * @return string
     */
-    public static function url($relative, $width, $height = 0)
+    public static function fromFile($relativeFilename, $width, $height = 0, $fallback = null)
     {
-       
-        $urlizer = new Urlizer($relative);
+        
+        $urlizer = new Urlizer($relativeFilename);
 
-        if (isset(static::$config['public_path'])) {
-            $urlizer->setPublicPath(static::$config['public_path']);
+        static::configureUrlizer($urlizer);
+
+        $filename = $urlizer->getPublicFilename();
+
+        try {
+
+            $thumb = new static($filename, $width, $height);
+
+        } catch (\InvalidArgumentException $e) {
+
+            if ($fallback === null) {
+
+                throw $e;
+            }
+
+            return $fallback;
         }
-
-        if (isset(static::$config['base_uri'])) {
-            $urlizer->setBaseUrl(static::$config['base_uri']);
-        }
-
-        $urlizer->setThumbFolder(static::$config['thumb_folder']);
-
-        $thumb = new static($urlizer->getPublicFilename(), $width, $height);
 
         $basename = $thumb->generateBasename();
 
@@ -225,19 +231,62 @@ class Thumb
     }
 
     /**
+    * Get copy from external file url for make thumb
+    */
+    public static function fromUrl($url, $width, $height, $fallback = null)
+    {
+
+        $extension = pathinfo($url, PATHINFO_EXTENSION);
+
+        $filename = sprintf('%s/thumb_%s.%s', sys_get_temp_dir(), md5($url), $extension);
+
+        if (! @copy($url, $filename)) {
+
+            return $fallback;
+        }
+
+        $urlizer = new Urlizer();
+
+        static::configureUrlizer($urlizer);
+        
+        $thumb = new static($filename, $width, $height);
+
+        $basename = $thumb->generateBasename();
+
+        $filename = $urlizer->buildThumbFilename($basename);
+
+        $thumb->save($filename);
+
+        return $urlizer->buildThumbUrl($basename);
+    }
+
+
+    public static function url($relative, $width, $height, $fallback = null)
+    {
+        if (preg_match('/^https?:\/\//i', $relative)) {
+
+            return static::fromUrl($relative, $width, $height, $fallback);
+        }
+
+        return static::fromFile($relative, $width, $height, $fallback);
+    }
+
+    /**
     * @param string $relative
     * @param array $attributes
     * @return string
     */
     public static function image($relative, array $attributes = [])
     {
-        $attributes += ['alt' => null, 'height' => 0, 'width' => 0];
+        $attributes += ['alt' => null];
 
-        $height = $attributes['height'];
+        $height = isset($attributes['height']) ? $attributes['height'] : 0;
 
-        $width = $attributes['width'];
+        $width = isset($attributes['width']) ? $attributes['width'] : 0;
 
-        $attributes['src'] = static::url($relative, $width, $height);
+        $url = static::url($relative, $width, $height);
+        
+        $attributes['src'] = $url;
 
         $attrs = [];
 
@@ -260,6 +309,21 @@ class Thumb
     public static function config(array $config)
     {
         static::$config = array_merge(static::$config, $config);
+    }
+
+
+    protected static function configureUrlizer(Urlizer $urlizer)
+    {
+
+        $path = isset(static::$config['public_path']) ? static::$config['public_path'] : $_SERVER['DOCUMENT_ROOT'];
+
+        $urlizer->setPublicPath($path);
+    
+        if (isset(static::$config['base_uri'])) {
+            $urlizer->setBaseUrl(static::$config['base_uri']);
+        }
+
+        $urlizer->setThumbFolder(static::$config['thumb_folder']);
     }
 
 }
