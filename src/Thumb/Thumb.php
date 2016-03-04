@@ -155,6 +155,7 @@ class Thumb
 
     /**
     * @param string $destiny
+    * @return void
     */
     protected function prepareDestiny($destiny)
     {
@@ -232,6 +233,10 @@ class Thumb
 
     /**
     * Get copy from external file url for make thumb
+    * @param string $url
+    * @param float $width
+    * @param float $height
+    * @param string|null $fallaback
     */
     public static function fromUrl($url, $width, $height, $fallback = null)
     {
@@ -260,7 +265,13 @@ class Thumb
         return $urlizer->buildThumbUrl($basename);
     }
 
-
+    /**
+    * @param string $relative (filename or url)
+    * @param float $width
+    * @param float $height
+    * @param string|null $fallback
+    * @return string
+    */
     public static function url($relative, $width, $height, $fallback = null)
     {
         if (preg_match('/^https?:\/\//i', $relative)) {
@@ -311,7 +322,10 @@ class Thumb
         static::$config = array_merge(static::$config, $config);
     }
 
-
+    /**
+    * @param \PHPLegends\Thumb\Urlizer $urlizer
+    * @return void
+    */
     protected static function configureUrlizer(Urlizer $urlizer)
     {
 

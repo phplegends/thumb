@@ -6,10 +6,7 @@ use PHPLegends\Thumb\Thumb;
 
 class ResizerTest extends PHPUnit_Framework_TestCase
 {
-	public  function __construct()
-	{
-
-	}
+	
 
 	public function _testResize()
 	{
@@ -41,10 +38,8 @@ class ResizerTest extends PHPUnit_Framework_TestCase
 	public function testUrl()
 	{
 
-
 		$url = Thumb::create(__DIR__ . '/../test/test.png', 50)
 					->urlize('img/test-60.png', 'http://localhost:8000/test');
-
 
 		$this->assertEquals(
 			'http://localhost:8000/test/img/test-60.png',
