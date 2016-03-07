@@ -128,6 +128,10 @@ class Thumb
         return $this->getOriginDirectory() . '/' . $this->generateBasename();
     }
 
+    /**
+    * Generate basename from the destiny file
+    * @return string
+    */
     protected function generateBasename()
     {
         $filename = md5($this->image . $this->height . $this->width);
@@ -251,7 +255,7 @@ class Thumb
 
         $filename = sprintf('%s/thumb_%s.%s', sys_get_temp_dir(), md5($url), $extension);
 
-        if (! @copy($url, $filename)) {
+        if (! file_exists($filename) && ! @copy($url, $filename)) {
 
             return static::$config['fallback'];
         }
@@ -272,6 +276,7 @@ class Thumb
     }
 
     /**
+    * Create a thumb url based on url or filename (relative or fullpath)
     * @param string $relative (filename or url)
     * @param float $width
     * @param float $height
@@ -295,6 +300,7 @@ class Thumb
     }
 
     /**
+    * Returns the image tag with thumb, based on attributes "height" and "width"
     * @param string $relative
     * @param array $attributes
     * @return string
@@ -325,7 +331,7 @@ class Thumb
     }
 
     /**
-    * @static
+    * Merges the global config 
     * @param array $config
     * @return void
     */
@@ -335,6 +341,7 @@ class Thumb
     }
 
     /**
+    * Configure the \PHPLegends\Thumb\Urlizer from global config
     * @param \PHPLegends\Thumb\Urlizer $urlizer
     * @return void
     */
