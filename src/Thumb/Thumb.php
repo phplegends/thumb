@@ -7,6 +7,7 @@ use Gregwar\Image\Image as GregwarImage;
 /**
 * @author Wallace de Souza Vizerra <wallacemaxters@gmail.com>
 */
+
 class Thumb
 {
 
@@ -14,6 +15,7 @@ class Thumb
         'base_uri'     => null,
         'public_path'  => null,
         'thumb_folder' => '_thumbs',
+        'fallback'     => 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNgYPhfDwACggF/yWU3jgAAAABJRU5ErkJggg==',
     ];
 
     /**
@@ -52,7 +54,7 @@ class Thumb
 
         }
 
-        $this->image = $image;
+        $this->image = realpath($image);
 
         $this->height = $height;
 
@@ -121,12 +123,12 @@ class Thumb
     * Generate a filename
     * @return string
     */
-    public function generateFilename()
+    protected function generateFilename()
     {
         return $this->getOriginDirectory() . '/' . $this->generateBasename();
     }
 
-    public function generateBasename()
+    protected function generateBasename()
     {
         $filename = md5($this->image . $this->height . $this->width);
 
@@ -140,7 +142,7 @@ class Thumb
     * @param string $destiny
     * @return boolean
     */
-    public function isCacheExpired($destiny)
+    protected function isCacheExpired($destiny)
     {
         $cacheModified = filemtime($destiny);
 
@@ -193,20 +195,25 @@ class Thumb
     }
 
     /**
-    * 
-    * @param string $relative
+    * Returns the url from thumb based on filename
+    * @param string $filename
     * @param float $width
     * @param float $height
     * @return string
     */
-    public static function fromFile($relativeFilename, $width, $height = 0, $fallback = null)
+    public static function fromFile($filename, $width, $height = 0)
     {
         
-        $urlizer = new Urlizer($relativeFilename);
+        $urlizer = new Urlizer($filename);
 
         static::configureUrlizer($urlizer);
 
-        $filename = $urlizer->getPublicFilename();
+        // If the filename is not initialized by '/', this is a fullpath
+        
+        if (strpos($filename, '/') !== 0) {
+
+            $filename = $urlizer->getPublicFilename();
+        }
 
         try {
 
@@ -214,12 +221,12 @@ class Thumb
 
         } catch (\InvalidArgumentException $e) {
 
-            if ($fallback === null) {
+            if (static::$config['fallback'] === null) {
 
                 throw $e;
             }
 
-            return $fallback;
+            return static::$config['fallback'];
         }
 
         $basename = $thumb->generateBasename();
@@ -236,18 +243,17 @@ class Thumb
     * @param string $url
     * @param float $width
     * @param float $height
-    * @param string|null $fallaback
     */
-    public static function fromUrl($url, $width, $height, $fallback = null)
+    public static function fromUrl($url, $width, $height = 0)
     {
 
-        $extension = pathinfo($url, PATHINFO_EXTENSION);
+        $extension = pathinfo(strtok($url, '?'), PATHINFO_EXTENSION);
 
         $filename = sprintf('%s/thumb_%s.%s', sys_get_temp_dir(), md5($url), $extension);
 
         if (! @copy($url, $filename)) {
 
-            return $fallback;
+            return static::$config['fallback'];
         }
 
         $urlizer = new Urlizer();
@@ -269,17 +275,23 @@ class Thumb
     * @param string $relative (filename or url)
     * @param float $width
     * @param float $height
-    * @param string|null $fallback
     * @return string
     */
-    public static function url($relative, $width, $height, $fallback = null)
+    public static function url($relative, $width, $height)
     {
+
         if (preg_match('/^https?:\/\//i', $relative)) {
 
-            return static::fromUrl($relative, $width, $height, $fallback);
+            return static::fromUrl($relative, $width, $height);
+
+        } elseif (strlen(parse_url($relative, PHP_URL_QUERY)) > 0) {
+
+            $relative = static::$config['base_uri'] . $relative;
+
+            return static::fromUrl($relative, $width, $height);
         }
 
-        return static::fromFile($relative, $width, $height, $fallback);
+        return static::fromFile($relative, $width, $height);
     }
 
     /**

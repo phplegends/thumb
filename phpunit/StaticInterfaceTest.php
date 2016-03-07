@@ -7,25 +7,58 @@ use PHPLegends\Thumb\Thumb;
 class StaticInterfaceTest extends PHPUnit_Framework_TestCase
 {
 
+	public function __construct()
+	{
+		Thumb::config([
+			'public_path'  => __DIR__ . '/../test',
+			'thumb_folder' => 'thumb.cache',
+			'base_uri'     => 'http://localhost:8000/',
+			'fallback'     => 'img/fallback.png'
+		]);
+	}
+
 	public function testCall()
 	{
-
-		Thumb::config([
-			'public_path' => __DIR__ . '/../test',
-			'thumb_folder' => 'thumb.cache',
-			'base_uri'     => 'http://localhost:8000/'
-		]);
-
-		$img = Thumb::image('test.png', [
-			'height' => 12
-		]);
 
 		$url = Thumb::url('test.png', 0, 12);
 		
 		$this->assertEquals(
-			'http://localhost:8000/thumb.cache/b40b2331342f86008097b160820b8526.png',
+			'http://localhost:8000/thumb.cache/0dd214c0073fe486ebbe39888039c685.png',
 			$url
 		);
 
+	}
+
+	public function testFallback()
+	{
+
+		$url = Thumb::url('no-no-no/non-exists.png', 0, 12);
+
+		$this->assertEquals(
+			'img/fallback.png',
+			$url
+		);
+	}
+
+	public function testFullpath()
+	{
+		$url = Thumb::url('/var/www/thumb/test/img/test-60.png', 0, 12);
+
+		// If detect that file doesnt exists, return the fallback. In this case, doesn't should be the "fallback" url
+
+		$this->assertNotEquals(
+			'img/fallback.png',
+			$url
+		);
+	}
+
+	public function testRelativePath()
+	{
+		$url = Thumb::url('img/test-60.png', 0, 12);
+
+		$this->assertNotEquals(
+			'img/fallback.png',
+			$url
+		);
 	}
 }
