@@ -7,7 +7,7 @@ use PHPLegends\Thumb\Thumb;
 class StaticInterfaceTest extends PHPUnit_Framework_TestCase
 {
 
-	public function testCall()
+	public function __construct()
 	{
 
 		Thumb::config([
@@ -16,16 +16,26 @@ class StaticInterfaceTest extends PHPUnit_Framework_TestCase
 			'base_uri'     => 'http://localhost:8000/'
 		]);
 
-		$img = Thumb::image('test.png', [
-			'height' => 12
-		]);
+	}
 
-		$url = Thumb::url('test.png', 0, 12);
+	public function testFullpath()
+	{
+		$url = Thumb::url(__DIR__ . '/../test/img/test-50.png', 0, 20);
+
+		$this->assertNotEquals('img/fallback.png', $url, 'Falhou. É igual ao "fallback"');
+	}
+
+	public function testRelativePath()
+	{
+		$url = Thumb::url('img/test-50.png', 0, 20);
 		
-		$this->assertEquals(
-			'http://localhost:8000/thumb.cache/b40b2331342f86008097b160820b8526.png',
-			$url
-		);
+		$this->assertNotEquals('img/fallback.png', $url, 'Falhou. É igual ao "fallback"');	
+	}
 
+	public function testFallback()
+	{
+		$url = Thumb::url('non-exists/non-exists.png', 0, 20, '/img/fallback.png');
+		
+		$this->assertEquals('/img/fallback.png', $url, 'Falhou. Deveria ser ambos iguais');	
 	}
 }

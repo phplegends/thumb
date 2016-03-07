@@ -52,7 +52,7 @@ class Thumb
 
         }
 
-        $this->image = $image;
+        $this->image = realpath($image);
 
         $this->height = $height;
 
@@ -194,19 +194,22 @@ class Thumb
 
     /**
     * 
-    * @param string $relative
+    * @param string $filename
     * @param float $width
     * @param float $height
     * @return string
     */
-    public static function fromFile($relativeFilename, $width, $height = 0, $fallback = null)
+    public static function fromFile($filename, $width, $height = 0, $fallback = null)
     {
         
-        $urlizer = new Urlizer($relativeFilename);
+        $urlizer = new Urlizer($filename);
 
         static::configureUrlizer($urlizer);
 
-        $filename = $urlizer->getPublicFilename();
+        if (strpos($filename, '/') !== 0) {
+
+            $filename = $urlizer->getPublicFilename();
+        }
 
         try {
 
@@ -226,7 +229,7 @@ class Thumb
 
         $filename = $urlizer->buildThumbFilename($basename);
 
-        $thumb->save($filename);
+        $thumb->getCache($filename);
 
         return $urlizer->buildThumbUrl($basename);
     }
@@ -238,10 +241,10 @@ class Thumb
     * @param float $height
     * @param string|null $fallaback
     */
-    public static function fromUrl($url, $width, $height, $fallback = null)
+    public static function fromUrl($url, $width, $height = 0, $fallback = null)
     {
 
-        $extension = pathinfo($url, PATHINFO_EXTENSION);
+        $extension = pathinfo(strtok($url, '?'), PATHINFO_EXTENSION);
 
         $filename = sprintf('%s/thumb_%s.%s', sys_get_temp_dir(), md5($url), $extension);
 
@@ -260,7 +263,7 @@ class Thumb
 
         $filename = $urlizer->buildThumbFilename($basename);
 
-        $thumb->save($filename);
+        $thumb->getCache($filename);
 
         return $urlizer->buildThumbUrl($basename);
     }
@@ -272,9 +275,15 @@ class Thumb
     * @param string|null $fallback
     * @return string
     */
-    public static function url($relative, $width, $height, $fallback = null)
+    public static function url($relative, $width, $height = 0, $fallback = null)
     {
         if (preg_match('/^https?:\/\//i', $relative)) {
+
+            return static::fromUrl($relative, $width, $height, $fallback);
+
+        } elseif (strlen(parse_url($relative, PHP_URL_QUERY)) > 0) {
+
+            $relative = static::$config['base_uri'] . $relative;
 
             return static::fromUrl($relative, $width, $height, $fallback);
         }
@@ -313,7 +322,6 @@ class Thumb
     }
 
     /**
-    * @static
     * @param array $config
     * @return void
     */
@@ -334,6 +342,7 @@ class Thumb
         $urlizer->setPublicPath($path);
     
         if (isset(static::$config['base_uri'])) {
+
             $urlizer->setBaseUrl(static::$config['base_uri']);
         }
 
