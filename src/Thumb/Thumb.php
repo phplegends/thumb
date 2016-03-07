@@ -73,7 +73,7 @@ class Thumb
             $destiny = $this->generateFilename();
         }
 
-        $extension = pathinfo($destiny, PATHINFO_EXTENSION);
+        $extension = strtolower(pathinfo($destiny, PATHINFO_EXTENSION));
 
         $this->prepareDestiny($destiny);
 
