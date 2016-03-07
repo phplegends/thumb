@@ -90,7 +90,7 @@ class Thumb
     {
 
         if (! file_exists($destiny) || $this->isCacheExpired($destiny)) {
-
+            
             return $this->save($destiny);
         }
 
@@ -248,15 +248,19 @@ class Thumb
 
         $filename = sprintf('%s/thumb_%s.%s', sys_get_temp_dir(), md5($url), $extension);
 
-        if (! @copy($url, $filename)) {
-
-            return $fallback;
-        }
-
         $urlizer = new Urlizer();
 
         static::configureUrlizer($urlizer);
         
+        // Se não existir o arquivo e a cópia falhar, retorna o fallback
+        // Se o arquivo existir, simplesmente retorna o cache
+
+        if (! file_exists($filename) && ! @copy($url, $filename)) {
+
+            return $fallback;
+            
+        }
+
         $thumb = new static($filename, $width, $height);
 
         $basename = $thumb->generateBasename();
@@ -266,6 +270,8 @@ class Thumb
         $thumb->getCache($filename);
 
         return $urlizer->buildThumbUrl($basename);
+        
+
     }
 
     /**

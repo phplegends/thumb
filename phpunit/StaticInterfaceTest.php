@@ -38,4 +38,9 @@ class StaticInterfaceTest extends PHPUnit_Framework_TestCase
 		
 		$this->assertEquals('/img/fallback.png', $url, 'Falhou. Deveria ser ambos iguais');	
 	}
+
+	public function testUrlQuery()
+	{
+		$url = Thumb::url('https://i.ytimg.com/vi/PAKCgvprpQ8/maxresdefault.jpg', 0, 12);
+	}
 }
