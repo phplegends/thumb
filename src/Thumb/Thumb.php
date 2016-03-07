@@ -63,7 +63,7 @@ class Thumb
 
     /**
     * @param string|null $destiny
-    * @return \SplFileObject
+    * @return string
     */
     public function save($destiny = null)
     {
@@ -81,12 +81,12 @@ class Thumb
                     ->resize($this->width, $this->height, 0XFFFFFF, true)
                     ->save($destiny, $extension);
 
-        return new \SplFileObject($destiny, 'r');
+        return $destiny;
     }
 
     /**
     * @param string|null $filename
-    * @return \SplFileObject
+    * @return string
     */
     public function getCache($destiny = null)
     {
@@ -96,7 +96,7 @@ class Thumb
             return $this->save($destiny);
         }
 
-        return new \SplFileObject($destiny, 'r');
+        return $destiny;
     }
 
     /**
