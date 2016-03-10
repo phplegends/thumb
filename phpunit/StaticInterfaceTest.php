@@ -61,4 +61,11 @@ class StaticInterfaceTest extends PHPUnit_Framework_TestCase
 			$url
 		);
 	}
+
+	public function testExternalUrl()
+	{
+		$url = Thumb::url('https://www.google.com.br/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png', 0, 20);
+
+		$this->assertContains('http://localhost:8000/', $url);
+	}
 }
