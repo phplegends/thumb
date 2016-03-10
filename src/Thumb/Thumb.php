@@ -237,7 +237,7 @@ class Thumb
 
         $filename = $urlizer->buildThumbFilename($basename);
 
-        $thumb->save($filename);
+        $thumb->getCache($filename);
 
         return $urlizer->buildThumbUrl($basename);
     }
@@ -270,7 +270,7 @@ class Thumb
 
         $filename = $urlizer->buildThumbFilename($basename);
 
-        $thumb->save($filename);
+        $thumb->getCache($filename);
 
         return $urlizer->buildThumbUrl($basename);
     }
