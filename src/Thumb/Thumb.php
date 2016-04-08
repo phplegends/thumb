@@ -12,10 +12,11 @@ class Thumb
 {
 
     protected static $config = [
-        'base_uri'     => null,
-        'public_path'  => null,
-        'thumb_folder' => '_thumbs',
-        'fallback'     => 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNgYPhfDwACggF/yWU3jgAAAABJRU5ErkJggg==',
+        'default_extension' => null,
+        'base_uri'          => null,
+        'public_path'       => null,
+        'thumb_folder'      => '_thumbs',
+        'fallback'          => 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNgYPhfDwACggF/yWU3jgAAAABJRU5ErkJggg==',
     ];
 
     /**
@@ -51,7 +52,6 @@ class Thumb
         if (! file_exists($image)) {
 
             throw new \InvalidArgumentException("The file {$image} does not exists");
-
         }
 
         $this->image = realpath($image);
@@ -73,7 +73,14 @@ class Thumb
             $destiny = $this->generateFilename();
         }
 
-        $extension = strtolower(pathinfo($destiny, PATHINFO_EXTENSION));
+        if (isset(static::$config['default_extension'])) {
+
+            $extension = static::$config['default_extension'];
+
+        } else {
+
+            $extension = strtolower(pathinfo($destiny, PATHINFO_EXTENSION));
+        }
 
         $this->prepareDestiny($destiny);
 
@@ -136,7 +143,15 @@ class Thumb
     {
         $filename = md5($this->image . $this->height . $this->width);
 
-        $extension = pathinfo($this->image, PATHINFO_EXTENSION);
+        if (isset(static::$config['default_extension'])) {
+
+            $extension = static::$config['default_extension'];
+
+        } else {
+
+            $extension = pathinfo($this->image, PATHINFO_EXTENSION);
+
+        }
 
         return $filename . '.' . $extension;   
     }
@@ -358,5 +373,4 @@ class Thumb
 
         $urlizer->setThumbFolder(static::$config['thumb_folder']);
     }
-
 }

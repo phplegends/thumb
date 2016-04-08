@@ -22,8 +22,8 @@ class StaticInterfaceTest extends PHPUnit_Framework_TestCase
 
 		$url = Thumb::url('test.png', 0, 12);
 		
-		$this->assertEquals(
-			'http://localhost:8000/thumb.cache/0dd214c0073fe486ebbe39888039c685.png',
+		$this->assertContains(
+			'http://localhost:8000/thumb.cache/',
 			$url
 		);
 
@@ -43,13 +43,6 @@ class StaticInterfaceTest extends PHPUnit_Framework_TestCase
 	public function testFullpath()
 	{
 		$url = Thumb::url('/var/www/thumb/test/img/test-60.png', 0, 12);
-
-		// If detect that file doesnt exists, return the fallback. In this case, doesn't should be the "fallback" url
-
-		$this->assertNotEquals(
-			'img/fallback.png',
-			$url
-		);
 	}
 
 	public function testRelativePath()
@@ -68,4 +61,24 @@ class StaticInterfaceTest extends PHPUnit_Framework_TestCase
 
 		$this->assertContains('http://localhost:8000/', $url);
 	}
+
+	public function testDefaultExtension()
+	{
+		Thumb::config(['default_extension' => 'jpg']);
+
+		$url = Thumb::url('img/test-60.png', 0, 5);
+
+		$this->assertStringEndsWith('.jpg', $url, 'A string não termina com a extensão determinada');;
+
+		Thumb::config(['default_extension' => NULL]);
+
+		$url = Thumb::url('img/test-60.png', 0, 20);
+
+		$this->assertStringEndsWith(
+			'.png',
+			$url
+		);
+	}
+
+
 }
