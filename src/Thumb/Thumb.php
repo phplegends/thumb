@@ -270,7 +270,7 @@ class Thumb
 
         $filename = sprintf('%s/thumb_%s.%s', sys_get_temp_dir(), md5($url), $extension);
 
-        if (! file_exists($filename) && ! @copy($url, $filename)) {
+        if (! file_exists($filename) && ! @copy($url, $filename, static::getStreamContextOptions())) {
 
             return static::$config['fallback'];
         }
@@ -372,5 +372,16 @@ class Thumb
         }
 
         $urlizer->setThumbFolder(static::$config['thumb_folder']);
+    }
+
+
+    protected static function getStreamContextOptions()
+    {
+        return stream_context_create([
+            'ssl' => [
+                'verify_peer'      => false,
+                'verify_peer_name' => false,
+            ],
+        ]);
     }
 }
